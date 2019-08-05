@@ -10,6 +10,8 @@ import UIKit
 
 class ViewControllerCell: UICollectionViewCell {
     
+    var cornerColor: UIColor?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupCell()
@@ -25,6 +27,18 @@ class ViewControllerCell: UICollectionViewCell {
                 self.contentView.alpha = self.isHighlighted ? 0.35 : 1
                 self.transform = self.isHighlighted ? self.transform.scaledBy(x: 0.96, y: 0.96) : .identity
             })
+        }
+    }
+    
+    override var isSelected: Bool {
+        didSet {
+            if isSelected {
+                self.contentView.layer.borderColor = UIColor.gray.cgColor
+                self.contentView.backgroundColor = .lightGray
+            } else {
+                self.contentView.layer.borderColor = cornerColor?.cgColor
+                self.contentView.backgroundColor = .white
+            }
         }
     }
     
@@ -80,7 +94,7 @@ class ViewControllerCell: UICollectionViewCell {
         self.contentView.layer.cornerRadius = 14
         self.contentView.layer.masksToBounds = true
         self.contentView.layer.borderWidth = 3.0
-        self.contentView.layer.borderColor = #colorLiteral(red: 0.9529411793, green: 0.6862745285, blue: 0.1333333403, alpha: 1)
+        self.contentView.layer.borderColor = cornerColor?.cgColor
         self.contentView.backgroundColor = .white
     }
     

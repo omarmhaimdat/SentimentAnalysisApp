@@ -24,6 +24,7 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate, 
         cell.sentiment.text = "\(self.cells[indexPath.row].sentiment)"
         cell.text.text = self.cells[indexPath.row].text
         cell.contentView.layer.borderColor = self.cells[indexPath.row].color.cgColor
+        cell.cornerColor = self.cells[indexPath.row].color
         return cell
     }
     
@@ -38,6 +39,21 @@ extension ViewController: UICollectionViewDataSource, UICollectionViewDelegate, 
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
         return UIEdgeInsets(top: 25, left: 0, bottom: 25, right: 0)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        switch mMode {
+        case .view:
+            newCollection.deselectItem(at: indexPath, animated: true)
+        case .select:
+            dictionarySelectedIndexPath[indexPath] = true
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+        if mMode == .select {
+            dictionarySelectedIndexPath[indexPath] = false
+        }
     }
 }
 

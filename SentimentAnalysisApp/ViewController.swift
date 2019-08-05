@@ -14,6 +14,7 @@ class ViewController: UIViewController {
     
     let cellId = "cellId"
     var cells = [Model]()
+    var selectArray : [IndexPath] = []
     
     var newCollection: UICollectionView = {
         
@@ -22,9 +23,39 @@ class ViewController: UIViewController {
         collection.translatesAutoresizingMaskIntoConstraints = false
         collection.isScrollEnabled = true
         collection.showsVerticalScrollIndicator = false
+        collection.allowsMultipleSelection = true
         
         return collection
     }()
+    
+    var dictionarySelectedIndexPath: [IndexPath: Bool] = [:]
+    
+    enum Mode {
+        case view
+        case select
+    }
+    
+    var mMode: Mode = .view {
+        didSet {
+            switch mMode {
+            case .view:
+                for (key, value) in dictionarySelectedIndexPath {
+                    if value {
+                        self.newCollection.deselectItem(at: key, animated: true)
+                    }
+                }
+                
+                dictionarySelectedIndexPath.removeAll()
+                self.navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .edit, target: self, action: #selector(editCell(_:)))
+                newCollection.allowsMultipleSelection = false
+                self.navigationItem.rightBarButtonItem = .init(barButtonSystemItem: .add, target: self, action: #selector(addCell(_:)))
+            case .select:
+                self.navigationItem.rightBarButtonItem = .init(barButtonSystemItem: .cancel, target: self, action: #selector(cancelCell(_:)))
+                self.navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .trash, target: self, action: #selector(didDeleteButtonClicked(_:)))
+                newCollection.allowsMultipleSelection = true
+            }
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,6 +77,7 @@ class ViewController: UIViewController {
         self.navigationController?.navigationBar.barStyle = .default
         self.tabBarController?.tabBar.isHidden = false
         self.navigationItem.rightBarButtonItem = .init(barButtonSystemItem: .add, target: self, action: #selector(addCell(_:)))
+        self.navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .edit, target: self, action: #selector(editCell(_:)))
     }
     
     func setupCollection() {
@@ -80,7 +112,6 @@ class ViewController: UIViewController {
         }
         let confirmAction = UIAlertAction(title: "Sentiment analysis", style: .default) { [weak alertController] _ in
             guard let alertController = alertController, let textField = alertController.textFields?.first else { return }
-            print("Current password \(String(describing: textField.text))")
             if let text = textField.text {
                 do {
                     let prediction = try model.prediction(text: text)
@@ -102,6 +133,29 @@ class ViewController: UIViewController {
         let cancelAction = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
         alertController.addAction(cancelAction)
         present(alertController, animated: true, completion: nil)
+    }
+    
+     @objc func editCell(_ sender: UIBarButtonItem) {
+        mMode = mMode == .view ? .select : .view
+    }
+    
+    @objc func didDeleteButtonClicked(_ sender: UIBarButtonItem) {
+        var deleteNeededIndexPaths: [IndexPath] = []
+        for (key, value) in dictionarySelectedIndexPath {
+            if value {
+                deleteNeededIndexPaths.append(key)
+            }
+        }
+        
+        for i in deleteNeededIndexPaths.sorted(by: { $0.item > $1.item }) {
+            cells.remove(at: i.item)
+        }
+        
+        newCollection.deleteItems(at: deleteNeededIndexPaths)
+        dictionarySelectedIndexPath.removeAll()
+    }
+    @objc func cancelCell(_ sender: UIBarButtonItem) {
+        mMode = mMode == .select ? .view : .select
     }
 
 }
