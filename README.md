@@ -15,7 +15,7 @@ I've wrote a full medium tutorial:
 
 ## Final Result:
 
-**Here’s the final result with the face detection and recognition.**
+**Here’s the final result: **
 
 ![GIF of the final result](final-result.gif "Final result")
 
